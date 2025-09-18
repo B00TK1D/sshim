@@ -1,0 +1,15 @@
+Include /etc/ssh/sshd_config.d/*.conf
+PermitEmptyPasswords yes
+KbdInteractiveAuthentication no
+UsePAM yes
+X11Forwarding yes
+PrintMotd no
+AcceptEnv LANG LC_*
+
+Subsystem       sftp    /usr/lib/openssh/sftp-server
+
+Match User ssh
+    ForceCommand /usr/local/bin/sshim.sh
+    AllowTcpForwarding no
+    X11Forwarding no
+    PermitTTY no
