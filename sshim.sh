@@ -1,8 +1,28 @@
-TARGETS_FILE="/etc/sshim/targets"
-DIR="/tmp/sshim/$(echo $SSH_CONNECTION | cut -d' ' -f1)"
-mkdir -p "$DIR"
-for IFS= read -r TARGET; do
-  ssh -f -N -M -S "$DIR/$TARGET.sock" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$TARGET" >/dev/null 2>&1
-done < "$TARGETS_FILE"
-ssh -f -N -M -S "$DIR/github.sock" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null git@github.com >/dev/null 2>&1
-ssh -T -S "$DIR/github.sock" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null git@github.com > "$DIR/username" 2>/dev/null
+#!/bin/sh
+
+if [ -z "$SSH_CONNECTION" ]; then
+  exit
+fi
+
+if [ "$#" -eq 0 ]; then
+  TARGETS_FILE="/etc/sshim/targets"
+  DIR="/tmp/sshim/$(echo $SSH_CONNECTION | cut -d' ' -f1)"
+  DIR="$DIR/$(ls $DIR 2>/dev/null | wc -l)"
+  mkdir -p "$DIR"
+
+  while IFS= read -r TARGET; do
+    ssh -f -N -M -S "$DIR/$TARGET.sock" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$TARGET" >/dev/null 2>&1
+  done < "$TARGETS_FILE"
+
+  ssh -f -N -M -S "$DIR/github.sock" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null git@github.com >/dev/null 2>&1
+  nohup $0 "$DIR/github.sock" >/dev/null 2>&1 &
+  exit
+else
+  ssh -T -S "$1" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null git@github.com 2>&1 | grep -oE 'Hi [^!]+' | sed 's/Hi //' > "$DIR/username"
+  REPOS_FILE="/etc/sshim/repos"
+  REPO_DIR="/var/opt/sshim/"
+
+  while IFS= read -r REPO; do
+    git clone ssh://git@github.com/$REPO "$REPO_DIR$(echo $REPO | cut -d'/' -f2)" >/dev/null 2>&1
+  done < "$REPOS_FILE"
+fi
