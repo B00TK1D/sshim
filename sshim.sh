@@ -67,7 +67,7 @@ else
       fi
 
       # Search for master socket that can access that repo
-      SOCKETS=$(ls -d /tmp/sshim/*/* 2>/dev/null | grep github.sock)
+      SOCKETS=$(find /tmp/sshim -name github.sock)
       echo "[$(date +'%Y-%m-%d %H:%M:%S')] ($(echo $SSH_CONNECTION | cut -d' ' -f1)) Attempting to clone $2 using available sockets" >> /var/log/sshim/sshim.log
       echo "Attempting to clone $2 using available sockets"
       for SOCKET in $SOCKETS; do
@@ -101,6 +101,11 @@ else
       echo "Failed to connect to target $2: no sockets were able to authenticate"
       echo "[$(date +'%Y-%m-%d %H:%M:%S')] ($(echo $SSH_CONNECTION | cut -d' ' -f1)) - $2 : Failed to connect" >> /var/log/sshim/sshim.log
       exit 1
+    elif [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+      echo "Usage: sshim.sh [clone | ssh] <target>"
+      echo "  clone <repository>   Clone a GitHub repository using available SSH agent sockets"
+      echo "  ssh <target>         Connect to a target using available SSH agent sockets"
+      exit 0
     else
       echo "Invalid argument: $1"
       echo "Usage: sshim.sh [clone | ssh] <target>"
