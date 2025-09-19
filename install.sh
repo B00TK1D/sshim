@@ -12,6 +12,7 @@ mkdir -p /tmp/sshim
 mkdir -p /var/opt/sshim
 chown -R ssh:ssh /tmp/sshim
 chown -R ssh:ssh /var/opt/sshim
+chown -R ssh:ssh /etc/sshim
 touch /etc/sshim/targets
 touch /etc/sshim/repos
 

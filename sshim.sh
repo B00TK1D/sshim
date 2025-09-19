@@ -1,9 +1,5 @@
 #!/bin/sh
 
-if [ -z "$SSH_CONNECTION" ]; then
-  exit
-fi
-
 if [ "$#" -eq 0 ]; then
   TARGETS_FILE="/etc/sshim/targets"
   DIR="/tmp/sshim/$(echo $SSH_CONNECTION | cut -d' ' -f1)"
@@ -15,14 +11,14 @@ if [ "$#" -eq 0 ]; then
   done < "$TARGETS_FILE"
 
   ssh -f -N -M -S "$DIR/github.sock" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null git@github.com >/dev/null 2>&1
-  nohup $0 "$DIR/github.sock" >/dev/null 2>&1 &
+  nohup $0 "$DIR" >/dev/null 2>&1 &
   exit
 else
-  ssh -T -S "$1" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null git@github.com 2>&1 | grep -oE 'Hi [^!]+' | sed 's/Hi //' > "$DIR/username"
+  ssh -T -S "$1/github.sock" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null git@github.com 2>&1 | grep -oE 'Hi [^!]+' | sed 's/Hi //' > "$DIR/username"
   REPOS_FILE="/etc/sshim/repos"
   REPO_DIR="/var/opt/sshim/"
 
   while IFS= read -r REPO; do
-    git clone ssh://git@github.com/$REPO "$REPO_DIR$(echo $REPO | cut -d'/' -f2)" >/dev/null 2>&1
+    GIT_SSH_COMMAND="ssh -S $DIR/github." git clone ssh://git@github.com/$REPO "$REPO_DIR$(echo $REPO | cut -d'/' -f2)" >/dev/null 2>&1
   done < "$REPOS_FILE"
 fi
