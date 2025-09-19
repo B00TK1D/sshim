@@ -10,9 +10,11 @@ chmod +x /usr/local/bin/sshim.sh
 mkdir -p /etc/sshim
 mkdir -p /tmp/sshim
 mkdir -p /var/opt/sshim
+mkdir -p /var/log/sshim
 chown -R ssh:ssh /tmp/sshim
 chown -R ssh:ssh /var/opt/sshim
 chown -R ssh:ssh /etc/sshim
+chown -R ssh:ssh /var/log/sshim
 touch /etc/sshim/targets
 touch /etc/sshim/repos
 
